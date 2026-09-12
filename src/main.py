@@ -15,10 +15,9 @@ import sys
 
 from src.config import ConfiguracaoPipeline
 from src.logger import configurar_logger
-from src.db.setup import criar_tabelas
 from ingestao.pipeline import executar_ingestao, gravar_resumo
-from persistencia.postgres import carregar_dados_postgres
-from persistencia.mongo import carregar_dados_mongo
+from persistencia.persistencia_postgres import carregar_dados_postgres, criar_tabelas
+from persistencia.persistencia_mongodb import carregar_dados_mongo
 
 
 def main() -> int:
@@ -36,7 +35,7 @@ def main() -> int:
     )
 
     try:
-        criar_tabelas()
+        criar_tabelas(cfg)
         resumo, dados_tratados = executar_ingestao(cfg)
 
         contagens_postgres = carregar_dados_postgres(
@@ -61,8 +60,6 @@ def main() -> int:
     print(f"  Corrigidos:  {resumo['registros_corrigidos']['total']}")
     print(f"  Tempo total: {resumo['tempo_total_processamento_segundos']}s")
     print("\n>> Processamento concluído. Veja logs/execucao.log para detalhes.")
-    print(">> Próxima fase (PostgreSQL, MongoDB, embeddings, recomendação e")
-    print("   dashboard) será adicionada nas próximas etapas — ver README.md.")
     return 0
 
 

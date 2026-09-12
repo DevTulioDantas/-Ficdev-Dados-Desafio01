@@ -1,9 +1,10 @@
 """
 RF06 — Persistência no PostgreSQL.
 
-Carrega os dados já tratados (RF04) nas tabelas definidas em
-sql/criar_banco.sql. A ordem de carga respeita as dependências de
-chave estrangeira: categoria -> conteudo, e usuario -> interacao.
+Cria as tabelas (a partir de sql/criar_banco.sql, se ainda não
+existirem) e carrega os dados já tratados (RF04) nelas. A ordem de
+carga respeita as dependências de chave estrangeira: categoria ->
+conteudo, e usuario -> interacao.
 
 Toda a carga acontece dentro de uma única transação (RF06 exige uso de
 transações): se qualquer inserção falhar, nada é gravado.
@@ -11,14 +12,39 @@ transações): se qualquer inserção falhar, nada é gravado.
 from __future__ import annotations
 
 import logging
+import os
 
 import psycopg2
 
 logger = logging.getLogger("desafio_dados")
 
+# Caminho até desafio_dados/sql/criar_banco.sql, a partir deste arquivo
+# (desafio_dados/persistencia/persistencia_postgres.py -> sobe 1 nível -> sql/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SQL_CRIAR_BANCO = os.path.join(BASE_DIR, "sql", "criar_banco.sql")
+
 
 def _conectar(cfg):
     return psycopg2.connect(**cfg.postgres_dsn)
+
+
+def criar_tabelas(cfg) -> None:
+    """Lê o script SQL puro em sql/criar_banco.sql e executa no banco.
+
+    Como o script usa CREATE TABLE IF NOT EXISTS, é seguro chamar essa
+    função toda vez que o pipeline (python -m src.main) iniciar.
+    """
+    with open(SQL_CRIAR_BANCO, "r", encoding="utf-8") as f:
+        sql_script = f.read()
+
+    conn = _conectar(cfg)
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(sql_script)
+        logger.info("Tabelas verificadas/criadas a partir de %s", SQL_CRIAR_BANCO)
+    finally:
+        conn.close()
 
 
 def _carregar_categorias(cur, catalogo_tratado: list[dict]) -> dict[str, int]:
