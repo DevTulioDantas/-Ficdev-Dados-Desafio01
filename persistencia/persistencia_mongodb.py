@@ -2,8 +2,9 @@
 RF07 — Persistência no MongoDB.
 
 Carrega os comentários/avaliações já tratados (RF04) na coleção
-comentarios_avaliacoes. Um índice único evita duplicar o mesmo
-comentário em execuções repetidas do pipeline.
+configurada em mongodb.colecao_comentarios (config.json). Um índice
+único evita duplicar o mesmo comentário em execuções repetidas do
+pipeline.
 """
 from __future__ import annotations
 
@@ -13,12 +14,14 @@ from pymongo import ASCENDING, MongoClient
 
 logger = logging.getLogger("desafio_dados")
 
-NOME_COLECAO = "comentarios_avaliacoes"
-
 
 def _conectar(cfg):
     client = MongoClient(cfg.mongodb_uri)
     return client, client[cfg.mongodb_db]
+
+
+def _nome_colecao(cfg) -> str:
+    return cfg.get("mongodb", "colecao_comentarios", padrao="comentarios_avaliacoes")
 
 
 def _garantir_indices(colecao) -> None:
@@ -43,7 +46,7 @@ def carregar_dados_mongo(cfg, comentarios_tratados: list[dict]) -> dict:
     foram carregados antes (mesma combinação usuario/conteudo/data/comentario)."""
     client, db = _conectar(cfg)
     try:
-        colecao = db[NOME_COLECAO]
+        colecao = db[_nome_colecao(cfg)]
         _garantir_indices(colecao)
 
         inseridos = 0
@@ -77,7 +80,7 @@ def contar_comentarios_por_categoria(cfg, cur_postgres) -> dict[str, int]:
     conteúdo, que só existe no PostgreSQL."""
     client, db = _conectar(cfg)
     try:
-        colecao = db[NOME_COLECAO]
+        colecao = db[_nome_colecao(cfg)]
         contagem_por_conteudo = {
             doc["_id"]: doc["quantidade"]
             for doc in colecao.aggregate([
