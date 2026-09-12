@@ -15,7 +15,10 @@ import sys
 
 from src.config import ConfiguracaoPipeline
 from src.logger import configurar_logger
-from ingestao.pipeline import executar_ingestao
+from src.db.setup import criar_tabelas
+from ingestao.pipeline import executar_ingestao, gravar_resumo
+from persistencia.postgres import carregar_dados_postgres
+from persistencia.mongo import carregar_dados_mongo
 
 
 def main() -> int:
@@ -33,7 +36,17 @@ def main() -> int:
     )
 
     try:
-        resumo = executar_ingestao(cfg)
+        criar_tabelas()
+        resumo, dados_tratados = executar_ingestao(cfg)
+
+        contagens_postgres = carregar_dados_postgres(
+            cfg, dados_tratados["catalogo"], dados_tratados["interacoes"]
+        )
+        contagens_mongo = carregar_dados_mongo(cfg, dados_tratados["comentarios"])
+
+        resumo["registros_carregados_por_banco"]["postgresql"] = contagens_postgres["total"]
+        resumo["registros_carregados_por_banco"]["mongodb"] = contagens_mongo["total"]
+        gravar_resumo(cfg, resumo)
     except Exception as exc:  # noqa: BLE001 - qualquer falha do pipeline deve ser registrada
         logger.exception("Falha não tratada durante o processamento: %s", exc)
         print(f"[ERRO] Processamento interrompido: {exc}")
