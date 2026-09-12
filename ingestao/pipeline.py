@@ -163,13 +163,28 @@ def executar_ingestao(cfg) -> dict:
         "tempo_total_processamento_segundos": tempo_total,
     }
 
-    caminho_resumo = cfg.get("saida", "arquivo_resumo_ingestao", padrao="dados/processados/resumo_ingestao.json")
-    with open(caminho_resumo, "w", encoding="utf-8") as f:
-        json.dump(resumo, f, ensure_ascii=False, indent=2)
+    gravar_resumo(cfg, resumo)
 
-    logger.info("Resumo da ingestão gravado em %s", caminho_resumo)
     logger.info("=" * 70)
     logger.info("TÉRMINO DO PROCESSAMENTO DE INGESTÃO (%.3fs)", tempo_total)
     logger.info("=" * 70)
 
-    return resumo
+    dados_tratados = {
+        "catalogo": catalogo_tratado,
+        "interacoes": interacoes_tratadas,
+        "comentarios": comentarios_tratados,
+    }
+    return resumo, dados_tratados
+
+
+def gravar_resumo(cfg, resumo: dict) -> None:
+    """Grava (ou regrava) o resumo da ingestão em disco (RF05).
+
+    Reaproveitada em dois momentos: ao final da ingestão (RF02-RF05) e
+    depois da persistência (RF06/RF07), quando as contagens de
+    registros carregados por banco são preenchidas.
+    """
+    caminho_resumo = cfg.get("saida", "arquivo_resumo_ingestao", padrao="dados/processados/resumo_ingestao.json")
+    with open(caminho_resumo, "w", encoding="utf-8") as f:
+        json.dump(resumo, f, ensure_ascii=False, indent=2)
+    logger.info("Resumo da ingestão gravado em %s", caminho_resumo)
