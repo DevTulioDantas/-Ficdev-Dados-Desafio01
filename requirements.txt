@@ -1,3 +1,5 @@
 python-dotenv
 psycopg2-binary
 pymongo
+sentence-transformers
+pgvectorpython -m src.main

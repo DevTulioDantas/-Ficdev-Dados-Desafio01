@@ -18,6 +18,8 @@ from src.logger import configurar_logger
 from ingestao.pipeline import executar_ingestao, gravar_resumo
 from persistencia.persistencia_postgres import carregar_dados_postgres, criar_tabelas
 from persistencia.persistencia_mongodb import carregar_dados_mongo
+from recomendacao.embeddings import gerar_embeddings
+from recomendacao.motor import gerar_recomendacoes
 
 
 def main() -> int:
@@ -46,6 +48,12 @@ def main() -> int:
         resumo["registros_carregados_por_banco"]["postgresql"] = contagens_postgres["total"]
         resumo["registros_carregados_por_banco"]["mongodb"] = contagens_mongo["total"]
         gravar_resumo(cfg, resumo)
+
+        contagens_embeddings = gerar_embeddings(cfg)
+        print(f"\nEmbeddings gerados nesta execução: {contagens_embeddings['gerados']}")
+
+        contagens_recomendacoes = gerar_recomendacoes(cfg)
+        print(f"Recomendações geradas nesta execução: {contagens_recomendacoes['geradas']}")
     except Exception as exc:  # noqa: BLE001 - qualquer falha do pipeline deve ser registrada
         logger.exception("Falha não tratada durante o processamento: %s", exc)
         print(f"[ERRO] Processamento interrompido: {exc}")
