@@ -1,0 +1,70 @@
+{
+  "fontes": {
+    "catalogo_csv": "dados/brutos/catalogo_conteudos.csv",
+    "interacoes_json": "dados/brutos/interacoes_usuarios.json",
+    "comentarios_json": "dados/brutos/comentarios_avaliacoes.json"
+  },
+  "saida": {
+    "diretorio_processados": "dados/processados",
+    "arquivo_resumo_ingestao": "dados/processados/resumo_ingestao.json"
+  },
+  "logging": {
+    "diretorio": "logs",
+    "arquivo": "logs/execucao.log",
+    "nivel": "INFO"
+  },
+  "postgres": {
+    "host": "localhost",
+    "porta": 5432,
+    "banco": "desafio_dados",
+    "schema": "public"
+  },
+  "mongodb": {
+    "host": "localhost",
+    "porta": 27017,
+    "banco": "desafio_dados",
+    "colecao_comentarios": "comentarios_avaliacoes"
+  },
+  "embeddings": {
+    "modelo": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "dimensao": 384,
+    "campos_utilizados": ["titulo", "descricao"]
+  },
+  "recomendacao": {
+    "top_n_padrao": 5,
+    "nota_minima_curtida": 4,
+    "limiares_classificacao": {
+      "positivo": 70,
+      "estavel": 40
+    }
+  },
+  "validacao": {
+    "categorias_validas": [
+      "Banco de Dados",
+      "Business Intelligence",
+      "Ciência de Dados",
+      "DevOps & Cloud",
+      "Engenharia de Dados",
+      "Inteligência Artificial",
+      "Programação & Software",
+      "Segurança & Governança"
+    ],
+    "tipos_conteudo_validos": ["Curso", "Vídeo", "Artigo", "Podcast"],
+    "niveis_validos": ["Básico", "Intermediário", "Avançado"],
+    "formato_data_catalogo": "%Y-%m-%d",
+    "tipos_interacao_validos": [
+      "visualização",
+      "início",
+      "conclusão",
+      "curtida",
+      "avaliação",
+      "compartilhamento"
+    ],
+    "formato_data_interacao": "%Y-%m-%dT%H:%M:%S",
+    "formato_data_comentario": "%Y-%m-%d",
+    "avaliacao_min": 1,
+    "avaliacao_max": 5,
+    "usuario_id_min": 1,
+    "usuario_id_max": 150
+  }
+}

@@ -1,0 +1,13 @@
+# Segredos — nunca versionar credenciais reais
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Saídas geradas pelo próprio pipeline (reproduzíveis a partir dos dados brutos)
+logs/*.log
+dados/processados/*
+!dados/processados/.gitkeep
