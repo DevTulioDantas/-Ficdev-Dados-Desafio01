@@ -83,7 +83,7 @@ def _calcular_perfil_usuario(interacoes: list[dict], nota_minima_curtida: int) -
         if positiva:
             positivas_por_categoria[cat] += 1
 
-        if it["tipo"] == "conclusao":
+        if it["tipo"] == "conclusão":
             concluidos.add(it["conteudo_id"])
 
     maior_tempo = max(tempo_por_categoria.values(), default=0)
