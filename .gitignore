@@ -11,3 +11,5 @@ venv/
 logs/*.log
 dados/processados/*
 !dados/processados/.gitkeep
+
+superset/
